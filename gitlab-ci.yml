@@ -1,0 +1,99 @@
+image: python:3.8-slim
+variables:
+  NAMESPACE_PROD: captcha
+  APP_NAME: ${CI_PROJECT_NAME}
+
+stages:
+  - lint
+  - test
+  - build_docker
+  - deploy
+
+.docker_build_template: &docker_definition
+  stage: build_docker
+  image:
+    # We recommend using the CERN version of the Kaniko image: gitlab-registry.cern.ch/ci-tools/docker-image-builder
+    name: gitlab-registry.cern.ch/ci-tools/docker-image-builder
+    entrypoint: [""]
+  script:
+    # Prepare Kaniko configuration file
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    # Build and push the image from the Dockerfile at the root of the project.
+    # To push to a specific docker tag, amend the --destination parameter, e.g. --destination $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+    # See https://docs.gitlab.com/ee/ci/variables/predefined_variables.html#variables-reference for available variables
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination ${TO}
+
+.deploy_template: &deploy_definition
+  stage: deploy
+  image: gitlab-registry.cern.ch/paas-tools/openshift-client:latest
+  script:
+    - LOWERCASE_PATH=$(echo ${CI_PROJECT_PATH} | awk '{ print tolower($0) } ')
+    # Adding || true to disable the error message when the image already exists
+    - oc import-image ${APP_NAME} --from="gitlab-registry.cern.ch/${LOWERCASE_PATH}:${TAG}" --confirm --token=${TOKEN} --server=${OPENSHIFT_SERVER} -n ${NAMESPACE} || true
+    - oc tag "gitlab-registry.cern.ch/${LOWERCASE_PATH}:${TAG}" "${APP_NAME}:latest" --token=${TOKEN} --server=${OPENSHIFT_SERVER} -n ${NAMESPACE}
+
+### Linting
+flake8:
+  image: python:3.8-alpine
+  stage: lint
+  before_script:
+    - pip install -r dev-requirements.txt
+  script:
+    - python -m flake8 *.py captcha_api
+  allow_failure: true
+
+pylint:
+  image: python:3.8-alpine
+  stage: lint
+  before_script:
+    - pip install -r dev-requirements.txt
+  script:
+    - python -m pylint *.py captcha_api
+  allow_failure: true
+
+### Testing
+test:
+  stage: test
+  before_script:
+    - export PIP_CONFIG_FILE=$(pwd)/pip.conf
+    - apt-get update && apt-get install -y -qq libfreetype6 fontconfig-config
+    - pip install -r dev-requirements.txt
+    - pip install -r requirements.txt
+  script:
+    - coverage run -m pytest
+    - coverage html
+    - coverage xml
+    - coverage report
+  artifacts:
+    reports:
+      cobertura: coverage.xml
+    paths:
+      - coverage_html_report
+    expire_in: 1 week
+
+### Docker build definitions
+
+build_docker_prod:
+  <<: *docker_definition
+  variables:
+    TO: ${CI_REGISTRY_IMAGE}:${PROD_TAG}
+  only:
+    - master # the branch you want to publish
+
+### Deployment definitions
+
+
+deploy_prod:
+  <<: *deploy_definition
+  variables:
+    ENVIRONMENT: prod
+    TOKEN: ${OPENSHIFT_DEPLOY_TOKEN}
+    OPENSHIFT_SERVER: ${OPENSHIFT_SERVER_PROD}
+    NAMESPACE: ${NAMESPACE_PROD}
+    TAG: ${PROD_TAG}
+    ROUTE_HOSTNAME: https://captcha.web.cern.ch
+  environment:
+    name: prod
+    url: https://captcha.web.cern.ch
+  only:
+    - master
