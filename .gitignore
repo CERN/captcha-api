@@ -131,7 +131,6 @@ dmypy.json
 .vscode
 .idea
 config
-.gitlab-ci.yml
 openshift
 coverage_html_report
 

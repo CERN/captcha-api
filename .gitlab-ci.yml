@@ -1,7 +1,9 @@
 image: python:3.8-slim
 variables:
   NAMESPACE_PROD: captcha
-  APP_NAME: ${CI_PROJECT_NAME}
+  APP_NAME: captcha-api
+  PROD_TAG: latest
+  OPENSHIFT_SERVER_PROD: "https://openshift.cern.ch"
 
 stages:
   - lint
@@ -27,10 +29,9 @@ stages:
   stage: deploy
   image: gitlab-registry.cern.ch/paas-tools/openshift-client:latest
   script:
-    - LOWERCASE_PATH=$(echo ${CI_PROJECT_PATH} | awk '{ print tolower($0) } ')
     # Adding || true to disable the error message when the image already exists
-    - oc import-image ${APP_NAME} --from="gitlab-registry.cern.ch/${LOWERCASE_PATH}:${TAG}" --confirm --token=${TOKEN} --server=${OPENSHIFT_SERVER} -n ${NAMESPACE} || true
-    - oc tag "gitlab-registry.cern.ch/${LOWERCASE_PATH}:${TAG}" "${APP_NAME}:latest" --token=${TOKEN} --server=${OPENSHIFT_SERVER} -n ${NAMESPACE}
+    - oc import-image ${APP_NAME} --from="${CI_REGISTRY_IMAGE}:${TAG}" --confirm --token=${OS_TOKEN} --server=${OPENSHIFT_SERVER} -n ${NAMESPACE} || true
+    - oc tag "${CI_REGISTRY_IMAGE}:${TAG}" "${APP_NAME}:latest" --token=${OS_TOKEN} --server=${OPENSHIFT_SERVER} -n ${NAMESPACE}
 
 ### Linting
 flake8:
@@ -81,17 +82,14 @@ build_docker_prod:
     - master # the branch you want to publish
 
 ### Deployment definitions
-
-
 deploy_prod:
   <<: *deploy_definition
   variables:
     ENVIRONMENT: prod
-    TOKEN: ${OPENSHIFT_DEPLOY_TOKEN}
+    OS_TOKEN: ${OPENSHIFT_DEPLOY_TOKEN}
     OPENSHIFT_SERVER: ${OPENSHIFT_SERVER_PROD}
     NAMESPACE: ${NAMESPACE_PROD}
     TAG: ${PROD_TAG}
-    ROUTE_HOSTNAME: https://captcha.web.cern.ch
   environment:
     name: prod
     url: https://captcha.web.cern.ch
