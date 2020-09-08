@@ -12,6 +12,6 @@ app = create_app()
 def setup_periodic_tasks(sender, **kwargs):
     # Executes every hour the delete old captchas task
     sender.add_periodic_task(
-        crontab(hour="*/1"),
+        crontab(minute=0, hour="*/1"),
         delete_old_captchas.s(),
     )
