@@ -20,7 +20,7 @@ setup(
     name="captcha-api",
     version="0.1.0",
     description="CERN CAPTCHA service",
-    url="https://gitlab.cern.ch/authzsvc/backends/captcha-api",
+    url="https://github.com/CERN/captcha-api",
     author="MALT IAM team",
     author_email="authzsvc-admins@cern.ch",
     classifiers=[
