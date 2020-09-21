@@ -9,7 +9,7 @@ def load_requirements():
     try:
         with open("requirements.txt", "r") as f:
             return f.readlines()
-    except:
+    except Exception:
         print("Exception getting requirements.txt file, returning []")
     return []
 

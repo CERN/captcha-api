@@ -3,11 +3,12 @@ import sys
 
 
 def configure_logging():
-    """Logging setup
-    """
+    """Logging setup"""
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s %(levelname)s %(filename)s:%(lineno)d - %(message)s"
+    )
 
     # adds console handler to logger instance the first time this code is called
     # avoids adding extra handlers to the instance, which causes duplicate logs msgs

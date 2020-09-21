@@ -1,6 +1,6 @@
 FROM python:3.8-slim
 
-RUN apt-get update && apt-get install -y -qq libfreetype6 fontconfig-config
+RUN apt-get update && apt-get install -y -qq libfreetype6 fontconfig-config espeak ffmpeg
 
 WORKDIR /app
 COPY . .
