@@ -1,9 +1,8 @@
-import os
-
 from celery.schedules import crontab
 
-from captcha_api.app_factory import celery, create_app
-from captcha_api.tasks import delete_old_captchas
+from .app import celery, create_app
+from .tasks import delete_old_captchas
+
 
 app = create_app()
 

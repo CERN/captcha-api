@@ -12,14 +12,17 @@ def _get_random_color():
 
 def _get_random_code():
     #  random characters
-    codes = [[chr(i) for i in range(49, 58)], [chr(i)
-                                               for i in range(65, 91)], [chr(i) for i in range(97, 123)]]
+    codes = [
+        [chr(i) for i in range(49, 58)],
+        [chr(i) for i in range(65, 91)],
+        [chr(i) for i in range(97, 123)],
+    ]
     codes = codes[randint(0, 2)]
     return codes[randint(0, len(codes) - 1)]
 
 
 def _generate_rotated_char(c, font):
-    txt = Image.new('L', font.getsize(c))
+    txt = Image.new("L", font.getsize(c))
     blank_image = ImageDraw.Draw(txt)
     blank_image.text((0, 0), c, font=font, fill=255)
     rotated_text = txt.rotate(randint(-50, 50), expand=1)
@@ -50,10 +53,12 @@ class CaptchaGenerator:
             text += char
 
             rotated = _generate_rotated_char(char, self.font)
-            colorized = ImageOps.colorize(
-                rotated, (0, 0, 0), _get_random_color())
-            img.paste(colorized, (int(self.width * 0.13 * (i + 1)),
-                                  int(self.height * 0.2)), rotated)
+            colorized = ImageOps.colorize(rotated, (0, 0, 0), _get_random_color())
+            img.paste(
+                colorized,
+                (int(self.width * 0.13 * (i + 1)), int(self.height * 0.2)),
+                rotated,
+            )
         #  add interference line
         for i in range(15):
             x_1 = randint(0, self.width)
@@ -63,9 +68,11 @@ class CaptchaGenerator:
             draw.line((x_1, y_1, x_2, y_2), fill=_get_random_color())
         #  add interference point
         for i in range(16):
-            draw.point((randint(0, self.width), randint(
-                0, self.height)), fill=_get_random_color())
+            draw.point(
+                (randint(0, self.width), randint(0, self.height)),
+                fill=_get_random_color(),
+            )
         #  save the picture
         img_byte_array = BytesIO()
-        img.save(img_byte_array, format='jpeg')
+        img.save(img_byte_array, format="jpeg")
         return img_byte_array, text

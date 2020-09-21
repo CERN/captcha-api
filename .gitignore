@@ -136,3 +136,6 @@ coverage_html_report
 
 # Test database
 test.db
+
+# Config files
+captcha.cfg

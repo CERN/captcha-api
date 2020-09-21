@@ -1,35 +1,31 @@
-import logging
-import re
 from base64 import b64encode
-from copy import deepcopy
 from datetime import datetime, timedelta
-from urllib.parse import urlparse
 from uuid import uuid4
 
-from flask import current_app, jsonify, request
+from flask import request, send_file
 from flask_restx import Api, Resource, fields
 
-from captcha_api.captcha_generator import CaptchaGenerator
-from captcha_api.database import Captcha, db
+from .captcha_generator import CaptchaGenerator
+from .db import db
+from .models import Captcha
+from .speech import text_to_speech
+
 
 api = Api(
     title="CAPTCHA API",
     description="A simple API for handling CAPTCHA",
-    security={'oauth2': ['api']},
+    security={"oauth2": ["api"]},
     doc="/swagger-ui",
 )
 
 
 captcha_ns = api.namespace(
-    "captcha", description="Utilities for validating and generating CAPTCHA")
+    "captcha", description="Utilities for validating and generating CAPTCHA"
+)
 
 
 captcha_model = captcha_ns.model(
-    "CaptchaAnswer",
-    {
-        "answer": fields.String,
-        "id": fields.String
-    }
+    "CaptchaAnswer", {"answer": fields.String, "id": fields.String}
 )
 
 
@@ -53,7 +49,8 @@ class CaptchaResource(Resource):
     def __init__(self, api=None, *args, **kwargs):
         super().__init__(api=api, *args, **kwargs)
         self.generator = CaptchaGenerator(
-            fontname=api.app.config['DEFAULT_CAPTCHA_FONT'])
+            fontname=api.app.config["DEFAULT_CAPTCHA_FONT"]
+        )
 
     def get(self):
         """
@@ -66,7 +63,7 @@ class CaptchaResource(Resource):
         db.session.commit()
         return {
             "id": captcha_id,
-            "img": "data:image/jpeg;base64," + b64encode(img_array.getvalue()).decode()
+            "img": "data:image/jpeg;base64," + b64encode(img_array.getvalue()).decode(),
         }
 
     @captcha_ns.doc(body=captcha_model)
@@ -94,3 +91,26 @@ class CaptchaResource(Resource):
         db.session.delete(existing)
         db.session.commit()
         return {"message": "Valid"}
+
+
+@captcha_ns.route("/audio/<string:captcha_id>")
+class CaptchaAudioResource(Resource):
+    """
+    Sending audio recordings for captchas
+    """
+
+    def get(self, captcha_id):
+        """
+        Generate a new captcha text for the given captcha
+        """
+        existing_captcha = Captcha.query.get_or_404(captcha_id)
+        split_answer = ", ".join(existing_captcha.answer)
+        mp3_file = text_to_speech(split_answer)
+
+        return send_file(
+            mp3_file,
+            as_attachment=True,
+            cache_timeout=-1,
+            attachment_filename="captcha.mp3",
+            mimetype="audio/mpeg",
+        )
