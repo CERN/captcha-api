@@ -46,3 +46,28 @@ The file returned is in the `mp3` format and can be easily loaded into an HTML f
 Make sure you installed the dependencies using `pip install -e .`. 
 
 Afterwards, run `flask db upgrade` to bring your DB to the latest level. By default it will use a `test.db` SQLite file in the `captcha_api` folder.
+
+
+## Embedded captcha.js
+
+The Captcha API includes a static Javascript file to help with simple web form integrations. To use or test this script:
+
+1. Configure the `captchaApiUrl` variable in `captcha_api/static/captcha.js`.
+2. Run the Captcha API.
+3. Include the script in your page, and the HTML element `<div id="cern-captcha"></div>` in your form (see the example in `captcha_api/static/demo.html`).
+4. When processing your form, validate `captchaAnswer` and `captchaId` with the `POST` endpoint of the Captcha API.
+
+Example for the production Captcha API:
+
+```
+<!DOCTYPE html>
+<html>
+    <script type="module" src="https://captcha.web.cern.ch/static/captcha.js"></script>
+<body>
+    <form>
+        <div id="cern-captcha"></div>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
+```
