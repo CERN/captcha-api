@@ -89,4 +89,4 @@ const Captcha = () => {
     reload();
 }
 
-document.getElementById("cern-captcha").addEventListener("load", Captcha());
+document.addEventListener("load", Captcha());
