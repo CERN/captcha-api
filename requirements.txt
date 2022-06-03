@@ -1,7 +1,7 @@
 Flask==1.1.1
 gunicorn>=19.5.0
 requests==2.23.*
-flask-restx==0.2.0
+flask-restx>=0.2.0
 certifi==2019.11.28
 werkzeug==0.16.1
 flask_cors==3.0.*
