@@ -1,4 +1,4 @@
-image: python:3.8-slim
+image: python:3.10-slim
 variables:
   NAMESPACE_PROD: captcha
   APP_NAME: captcha-api
@@ -35,11 +35,11 @@ stages:
 
 ### Linting
 flake8:
-  image: python:3.8-slim
+  image: python:3.10-slim
   stage: lint
   before_script:
     - apt-get update && apt-get install -y -qq gcc
-    - pip install -r dev-requirements.txt
+    - pip install flake8
   script:
     - python -m flake8 *.py captcha_api tests
   allow_failure: true
@@ -50,9 +50,8 @@ test:
   stage: test
   before_script:
     - export PIP_CONFIG_FILE=$(pwd)/pip.conf
-    - apt-get update && apt-get install -y -qq libfreetype6 fontconfig-config espeak ffmpeg
-    - pip install -r dev-requirements.txt
-    - pip install -r requirements.txt
+    - apt-get update && apt-get install -y -qq libfreetype6 fontconfig-config espeak ffmpeg libtiff5-dev libopenjp2-7-dev zlib1g-dev python3-tk gcc libfreetype6-dev
+    - pip install -e '.[dev]'
   script:
     - coverage run -m pytest
     - coverage html

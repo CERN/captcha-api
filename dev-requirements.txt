@@ -1,5 +1,0 @@
-pytest
-flake8
-coverage
-isort
-black==20.8b1

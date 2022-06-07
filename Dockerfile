@@ -1,6 +1,6 @@
-FROM python:3.8-slim
+FROM docker.io/library/python:3.10-slim
 
-RUN apt-get update && apt-get install -y -qq libfreetype6 fontconfig-config espeak ffmpeg
+RUN apt-get update && apt-get install -y -qq libfreetype6 fontconfig-config espeak ffmpeg libtiff5-dev libopenjp2-7-dev zlib1g-dev python3-tk gcc libfreetype6-dev
 
 WORKDIR /app
 COPY . .
