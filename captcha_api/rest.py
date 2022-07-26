@@ -1,6 +1,7 @@
 from base64 import b64encode
 from datetime import datetime, timedelta
 from uuid import uuid4
+from wsgiref import headers
 
 from flask import request, send_file
 from flask_restx import Api, Resource, fields
@@ -9,7 +10,8 @@ from .captcha_generator import CaptchaGenerator
 from .db import db
 from .models import Captcha
 from .speech import text_to_speech
-
+from .speech_gtts import text_to_speech as tts_gtts
+from .lang_best_match import best_locale
 
 api = Api(
     title="CAPTCHA API",
@@ -101,11 +103,49 @@ class CaptchaAudioResource(Resource):
 
     def get(self, captcha_id):
         """
-        Generate a new captcha text for the given captcha
+        Generate a audio captcha with local tts engine (offline)
+        Language based on header 'Accept-Language' following https://datatracker.ietf.org/doc/html/rfc3282
+        e.g: Headers 'Accept-Language: es-ES
         """
+
+        if request.accept_languages:
+            lang = best_locale(request.accept_languages)
+        else:
+            lang = 'en'
+
         existing_captcha = Captcha.query.get_or_404(captcha_id)
         split_answer = ", ".join(existing_captcha.answer)
-        mp3_file = text_to_speech(split_answer)
+        mp3_file = text_to_speech(split_answer,lang)
+
+        return send_file(
+            mp3_file,
+            as_attachment=True,
+            cache_timeout=-1,
+            attachment_filename="captcha.mp3",
+            mimetype="audio/mpeg",
+        )
+
+@captcha_ns.route("/audio/gtts/<string:captcha_id>")
+class CaptchaAudioResourceGtts(Resource):
+    """
+    Sending audio recordings for captchas with Google tts
+    """
+
+    def get(self, captcha_id):
+        """
+        Generate a audio captcha with google tts
+        Language based on header 'Accept-Language' following https://datatracker.ietf.org/doc/html/rfc3282
+        e.g: Headers 'Accept-Language: es-ES
+        """
+
+        if request.accept_languages:
+            lang = best_locale(request.accept_languages)
+        else:
+            lang = 'en'
+
+        existing_captcha = Captcha.query.get_or_404(captcha_id)
+        split_answer = ", ".join(existing_captcha.answer)
+        mp3_file = tts_gtts(split_answer,lang)
 
         return send_file(
             mp3_file,

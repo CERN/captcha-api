@@ -13,3 +13,5 @@ pyttsx3==2.90
 flask-migrate==2.5.3
 itsdangerous==2.0.1
 certifi
+werkzeug==2.1.2
+gtts==2.2.4

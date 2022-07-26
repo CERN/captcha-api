@@ -3,24 +3,19 @@ import time
 from io import BytesIO
 from tempfile import mkstemp
 
-import pyttsx3
+from sqlalchemy import true
+
+from gtts import gTTS
 
 
 def text_to_speech(text, lang):
     """Converts a piece of text to an mp3 document."""
 
-    engine = pyttsx3.init()
-
-    for voice in engine.getProperty('voices'):
-        for language in voice.languages:
-            if lang in language.decode()[:3]:
-                engine.setProperty('voice', voice.id)
-    
-    engine.setProperty("rate", 60)
     _, filename = mkstemp(suffix="-captcha.mp3")
-    engine.save_to_file(text, filename)
-    engine.runAndWait()
-    engine.stop()
+
+    tts = gTTS(text, lang=lang, tld='fr', slow=True)
+    tts.save(filename)
+
     # Required because of a weird FS error
     time.sleep(0.3)
 
