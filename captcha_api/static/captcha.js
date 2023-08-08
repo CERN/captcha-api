@@ -48,7 +48,7 @@ const Captcha = () => {
     }
 
     const template = (id, img) => `
-    <h3>Captcha:</h3>
+    <label>Captcha:
     <p>
     The code is valid only for 60 seconds. Your answer will be
     considered incorrect if you don't answer within 60 seconds. You
@@ -80,6 +80,7 @@ const Captcha = () => {
     type="hidden"
     value="${id}"
     />
+    </label>
     `
 
     const audioTemplate = (audioUrl) => `
