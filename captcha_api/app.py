@@ -46,7 +46,7 @@ def _setup_celery(app):
 
         celery.Task = ContextTask
     else:
-        app.logger.warn("Celery is disabled!")
+        app.logger.warning("Celery is disabled!")
 
 
 def _setup_db(app):
