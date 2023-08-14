@@ -1,4 +1,4 @@
-image: python:3.10-slim
+image: python:3.11-slim
 variables:
   NAMESPACE_PROD: captcha
   APP_NAME: captcha-api
@@ -35,7 +35,7 @@ stages:
 
 ### Linting
 flake8:
-  image: python:3.10-slim
+  image: python:3.11-slim
   stage: lint
   before_script:
     - apt-get update && apt-get install -y -qq gcc
@@ -59,7 +59,9 @@ test:
     - coverage report
   artifacts:
     reports:
-      cobertura: coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
     paths:
       - coverage_html_report
     expire_in: 1 week
