@@ -3,7 +3,7 @@ variables:
   NAMESPACE_PROD: captcha
   APP_NAME: captcha-api
   PROD_TAG: latest
-  OPENSHIFT_SERVER_PROD: "https://openshift.cern.ch"
+  OPENSHIFT_SERVER_PROD: https://api.paas.okd.cern.ch
 
 stages:
   - lint
