@@ -110,7 +110,7 @@ class CaptchaAudioResource(Resource):
         return send_file(
             mp3_file,
             as_attachment=True,
-            cache_timeout=-1,
-            attachment_filename="captcha.mp3",
+            max_age=-1,
+            download_name="captcha.mp3",
             mimetype="audio/mpeg",
         )
