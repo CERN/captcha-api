@@ -15,7 +15,8 @@ from .speech import text_to_speech
 from .speech_gtts import text_to_speech as tts_gtts
 
 
-WAIT_TIME = 2
+# Currently front is not able to handle a wait...
+WAIT_TIME = 0.5
 
 api = Api(
     title="CAPTCHA API",
