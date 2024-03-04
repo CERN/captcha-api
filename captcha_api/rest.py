@@ -1,3 +1,4 @@
+import time
 from base64 import b64encode
 from datetime import datetime, timedelta
 from uuid import uuid4
@@ -8,10 +9,11 @@ from flask_restx import Api, Resource, fields
 
 from .captcha_generator import CaptchaGenerator
 from .db import db
+from .lang_best_match import best_locale
 from .models import Captcha
 from .speech import text_to_speech
 from .speech_gtts import text_to_speech as tts_gtts
-from .lang_best_match import best_locale
+
 
 api = Api(
     title="CAPTCHA API",
@@ -58,6 +60,10 @@ class CaptchaResource(Resource):
         """
         Generate a new captcha text
         """
+
+        # Slow generation in case of attack
+        time.sleep(5)
+
         img_array, answer = self.generator.generate_captcha()
         captcha_id = str(uuid4())
         new_captcha = Captcha(id=captcha_id, answer=answer)
@@ -111,11 +117,11 @@ class CaptchaAudioResource(Resource):
         if request.accept_languages:
             lang = best_locale(request.accept_languages)
         else:
-            lang = 'en'
+            lang = "en"
 
         existing_captcha = Captcha.query.get_or_404(captcha_id)
         split_answer = ", ".join(existing_captcha.answer)
-        mp3_file = text_to_speech(split_answer,lang)
+        mp3_file = text_to_speech(split_answer, lang)
 
         return send_file(
             mp3_file,
@@ -124,6 +130,7 @@ class CaptchaAudioResource(Resource):
             attachment_filename="captcha.mp3",
             mimetype="audio/mpeg",
         )
+
 
 @captcha_ns.route("/audio/gtts/<string:captcha_id>")
 class CaptchaAudioResourceGtts(Resource):
@@ -141,11 +148,11 @@ class CaptchaAudioResourceGtts(Resource):
         if request.accept_languages:
             lang = best_locale(request.accept_languages)
         else:
-            lang = 'en'
+            lang = "en"
 
         existing_captcha = Captcha.query.get_or_404(captcha_id)
         split_answer = ", ".join(existing_captcha.answer)
-        mp3_file = tts_gtts(split_answer,lang)
+        mp3_file = tts_gtts(split_answer, lang)
 
         return send_file(
             mp3_file,
