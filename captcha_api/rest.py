@@ -15,6 +15,8 @@ from .speech import text_to_speech
 from .speech_gtts import text_to_speech as tts_gtts
 
 
+WAIT_TIME = 2
+
 api = Api(
     title="CAPTCHA API",
     description="A simple API for handling CAPTCHA",
@@ -62,7 +64,7 @@ class CaptchaResource(Resource):
         """
 
         # Slow generation in case of attack
-        time.sleep(5)
+        time.sleep(WAIT_TIME)
 
         img_array, answer = self.generator.generate_captcha()
         captcha_id = str(uuid4())
@@ -113,6 +115,9 @@ class CaptchaAudioResource(Resource):
         Language based on header 'Accept-Language' following https://datatracker.ietf.org/doc/html/rfc3282
         e.g: Headers 'Accept-Language: es-ES
         """
+
+        # Slow generation in case of attack
+        time.sleep(WAIT_TIME)
 
         if request.accept_languages:
             lang = best_locale(request.accept_languages)
