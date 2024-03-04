@@ -39,7 +39,7 @@ class CaptchaGenerator:
         self.height = height
         self.font = ImageFont.truetype(fontname, size=36)
 
-    def generate_captcha(self, length=6) -> Tuple[BytesIO, str]:
+    def generate_captcha(self, length=8) -> Tuple[BytesIO, str]:
         """
         Generate a captcha image
         :return: A tuple consisting of the image bytes and the text
