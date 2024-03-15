@@ -1,5 +1,6 @@
+import os
 from io import BytesIO
-from random import randint
+from random import randint, choice
 from typing import Tuple
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
@@ -34,10 +35,17 @@ class CaptchaGenerator:
     Generates captcha images based on the parameters
     """
 
-    def __init__(self, fontname="DejaVuSerif.ttf", width=250, height=60):
+    def __init__(self, fonts_dir="captcha_api/fonts", width=250, height=60):
         self.width = width
         self.height = height
-        self.font = ImageFont.truetype(fontname, size=36)
+        self.font = self._get_random_font(fonts_dir)
+
+    def _get_random_font(self, fonts_dir):
+        font_files = [f for f in os.listdir(fonts_dir) if f.endswith('.otf')]
+        if not font_files:
+            raise ValueError("No .otf fonts found in the specified directory.")
+        random_font_file = choice(font_files)
+        return ImageFont.truetype(os.path.join(fonts_dir, random_font_file), size=46)
 
     def generate_captcha(self, length=6) -> Tuple[BytesIO, str]:
         """
