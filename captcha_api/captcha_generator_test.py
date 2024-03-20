@@ -10,9 +10,9 @@ def generate_and_save_captchas(num_captchas=100, save_dir="captchas"):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     
-    generator = CaptchaGenerator()
 
     for i in range(num_captchas):
+        generator = CaptchaGenerator()
         img_byte_array, text = generator.generate_captcha()
         # Convert the byte array to an image
         img = Image.open(BytesIO(img_byte_array.getvalue()))

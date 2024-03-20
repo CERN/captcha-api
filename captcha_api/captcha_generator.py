@@ -26,7 +26,7 @@ def _generate_rotated_char(c, font):
     txt = Image.new("L", font.getsize(c))
     blank_image = ImageDraw.Draw(txt)
     blank_image.text((0, 0), c, font=font, fill=255)
-    rotated_text = txt.rotate(randint(-50, 50), expand=1)
+    rotated_text = txt.rotate(randint(-35, 35), expand=1)
     return rotated_text
 
 
@@ -41,11 +41,11 @@ class CaptchaGenerator:
         self.font = self._get_random_font(fonts_dir)
 
     def _get_random_font(self, fonts_dir):
-        font_files = [f for f in os.listdir(fonts_dir) if f.endswith('.otf')]
+        font_files = [f for f in os.listdir(fonts_dir) if f.endswith(('.otf', '.ttf'))]
         if not font_files:
-            raise ValueError("No .otf fonts found in the specified directory.")
+            raise ValueError("No .otf or .ttf fonts found in the specified directory.")
         random_font_file = choice(font_files)
-        return ImageFont.truetype(os.path.join(fonts_dir, random_font_file), size=46)
+        return ImageFont.truetype(os.path.join(fonts_dir, random_font_file), size=40)
 
     def generate_captcha(self, length=6) -> Tuple[BytesIO, str]:
         """
